@@ -59,10 +59,10 @@ GROQ_API_KEY=your_groq_api_key_here
 
 ## Installation
 
-Install the required dependencies:
+Install the web app dependencies:
 
 ```bash
-pip install langchain langchain-community langchain-text-splitters langchain-huggingface langchain-groq langchain-google-genai langchain-openai langchain-core faiss-cpu pypdf sentence-transformers transformers torch huggingface_hub groq langsmith python-dotenv tiktoken pandas ipykernel
+pip install -r requirements.txt
 ```
 
 ## How it Works
@@ -78,6 +78,34 @@ The notebook follows this flow:
 7. Apply a guardrail prompt to ensure only HR-related queries are answered.
 
 ## Usage
+
+### Web app
+
+For local development, add `GROQ_API_KEY` to the root `.env` file, then start the app:
+
+```bash
+streamlit run app.py
+```
+
+Open `http://localhost:8501` in your browser. The app builds its local policy index when you submit the first question.
+
+### Deploy to Streamlit Community Cloud
+
+1. Push this repository to GitHub. Make sure `.env` is not committed and the `zyro-dynamics-hr-corpus` folder is included.
+2. Sign in to [Streamlit Community Cloud](https://share.streamlit.io/) with GitHub and select **Create app**.
+3. Choose the repository and branch, and set the app file path to `app.py`.
+4. Open the app's **Advanced settings / Secrets** and add the key in TOML format:
+
+  ```toml
+  GROQ_API_KEY = "your-groq-api-key"
+  ```
+
+5. Deploy the app. Community Cloud installs packages from the root `requirements.txt`.
+6. Open the deployed URL and submit an HR policy question. The first request may take longer while the embedding model loads and the FAISS index is built.
+
+Never put the Groq key in the code, GitHub, or a frontend-visible setting. If the key was ever committed or exposed, revoke it and create a replacement.
+
+### Notebook
 
 Open the notebook `code.ipynb` and run the cells in order.
 
@@ -109,6 +137,7 @@ Example refusal message:
   - `LLM_Model = 'openai/gpt-oss-20b'`
 - The search retriever is configured to return the top 3 relevant document chunks.
 - The project is designed for internal HR knowledge retrieval and is not a general-purpose chatbot.
+- The FAISS index is rebuilt from the local PDFs when the deployed app starts; Community Cloud storage is not persistent across app restarts.
 
 ## License
 
